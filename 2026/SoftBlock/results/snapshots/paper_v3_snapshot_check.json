@@ -1,0 +1,204 @@
+{
+  "args": {
+    "complexportal_gmt": null,
+    "corum_gmt": null,
+    "gold_snapshot": "paper_v3",
+    "graphs": [
+      "STRING",
+      "BioPlex",
+      "HuRI",
+      "BioGRID",
+      "ComPPI",
+      "IntAct",
+      "hu.MAP2"
+    ],
+    "hashes": true,
+    "min_gold_size": 3,
+    "out_json": "codeseg/paper_v3/results/snapshots/paper_v3_snapshot_check.json",
+    "strict": false
+  },
+  "graphs": {
+    "BioGRID": {
+      "complexportal_complexes": 1154,
+      "corum_complexes": 1420,
+      "edges": 1002631,
+      "gold_snapshot": "paper_v3",
+      "min_gold_size": 3,
+      "nodes": 27590,
+      "paths": {
+        "complexportal_gmt": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/gold/complexportal.gmt",
+        "corum_gmt": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/gold/corum.gmt",
+        "edges": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/processed/biogrid/biogrid_weighted.edgelist",
+        "nodes": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/processed/biogrid/biogrid_nodes.txt"
+      },
+      "sha256": {
+        "complexportal_gmt": "25e33ec4bd008d2313dd03daca67e5e63a7b0806a62fc28be5dc5e69534fd395",
+        "corum_gmt": "5cca83a69278151f219041b299cc7c994b8222cfdfda2de18b64a14ddf625798",
+        "edges": "d587c5786d21f39747d8893402390ba543d2a308abf44e2a6acb9f426dd05fe1",
+        "nodes": "8c31e6e56d0e6395f1980889789ed24a762e1af9ed7423b1699eccea7b2d7bab"
+      },
+      "targets": {
+        "complexportal": 1157,
+        "corum": 1355,
+        "edges": 1002631,
+        "nodes": 27590
+      }
+    },
+    "BioPlex": {
+      "complexportal_complexes": 961,
+      "corum_complexes": 1235,
+      "edges": 118144,
+      "gold_snapshot": "paper_v3",
+      "min_gold_size": 3,
+      "nodes": 13923,
+      "paths": {
+        "complexportal_gmt": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/gold/complexportal.gmt",
+        "corum_gmt": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/gold/corum.gmt",
+        "edges": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v2/data/processed/bioplex/bioplex.edgelist",
+        "nodes": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v2/data/processed/bioplex/bioplex_nodes.txt"
+      },
+      "sha256": {
+        "complexportal_gmt": "25e33ec4bd008d2313dd03daca67e5e63a7b0806a62fc28be5dc5e69534fd395",
+        "corum_gmt": "5cca83a69278151f219041b299cc7c994b8222cfdfda2de18b64a14ddf625798",
+        "edges": "8c7e9d38a999e14ca56947dc59c35e50c0bf7ab0fd9bc6084dbc3d729676423f",
+        "nodes": "4c88952a4379e6a29a539d1aba850ebe9a9e7a632bf219e1a4a7bd1629fffa93"
+      },
+      "targets": {
+        "complexportal": 961,
+        "corum": 1164,
+        "edges": 118144,
+        "nodes": 13923
+      }
+    },
+    "ComPPI": {
+      "complexportal_complexes": 1142,
+      "corum_complexes": 1359,
+      "edges": 170728,
+      "gold_snapshot": "paper_v3",
+      "min_gold_size": 3,
+      "nodes": 15277,
+      "paths": {
+        "complexportal_gmt": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/gold/complexportal.gmt",
+        "corum_gmt": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/gold/corum.gmt",
+        "edges": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/processed/comppi/comppi_weighted.edgelist",
+        "nodes": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/processed/comppi/comppi_nodes.txt"
+      },
+      "sha256": {
+        "complexportal_gmt": "25e33ec4bd008d2313dd03daca67e5e63a7b0806a62fc28be5dc5e69534fd395",
+        "corum_gmt": "5cca83a69278151f219041b299cc7c994b8222cfdfda2de18b64a14ddf625798",
+        "edges": "f3e2316143ae4c766441e579947c9d3c63f73705d034ed2bea2bd94a5b660502",
+        "nodes": "39e1e538cb6bf479c1c9a09746b804f1d01c862f3ec1f9ca755f410ef25627dc"
+      },
+      "targets": {
+        "complexportal": 1158,
+        "corum": 1310,
+        "edges": 170728,
+        "nodes": 15277
+      }
+    },
+    "HuRI": {
+      "complexportal_complexes": 615,
+      "corum_complexes": 594,
+      "edges": 51717,
+      "gold_snapshot": "paper_v3",
+      "min_gold_size": 3,
+      "nodes": 8114,
+      "paths": {
+        "complexportal_gmt": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/gold/complexportal.gmt",
+        "corum_gmt": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/gold/corum.gmt",
+        "edges": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/processed/huri/huri.edgelist",
+        "nodes": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/processed/huri/huri_nodes.txt"
+      },
+      "sha256": {
+        "complexportal_gmt": "25e33ec4bd008d2313dd03daca67e5e63a7b0806a62fc28be5dc5e69534fd395",
+        "corum_gmt": "5cca83a69278151f219041b299cc7c994b8222cfdfda2de18b64a14ddf625798",
+        "edges": "0f476d23203c42f0c962d5707ccfb201bb51f25f65864b1709afeacf6fb9c2b9",
+        "nodes": "2633be9cb9ad244674b26f497d874efcb82c1ccc9ee394e1c2aa8279b4b119ea"
+      },
+      "targets": {
+        "complexportal": 616,
+        "corum": 537,
+        "edges": 51686,
+        "nodes": 8109
+      }
+    },
+    "IntAct": {
+      "complexportal_complexes": 1208,
+      "corum_complexes": 1379,
+      "edges": 527820,
+      "gold_snapshot": "paper_v3",
+      "min_gold_size": 3,
+      "nodes": 17763,
+      "paths": {
+        "complexportal_gmt": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/gold/complexportal.gmt",
+        "corum_gmt": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/gold/corum.gmt",
+        "edges": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/processed/intact/intact_weighted.edgelist",
+        "nodes": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/processed/intact/intact_nodes.txt"
+      },
+      "sha256": {
+        "complexportal_gmt": "25e33ec4bd008d2313dd03daca67e5e63a7b0806a62fc28be5dc5e69534fd395",
+        "corum_gmt": "5cca83a69278151f219041b299cc7c994b8222cfdfda2de18b64a14ddf625798",
+        "edges": "7079444273690ce84da058da5ef6b647e83fb38b4fe30aaa08e0cc353284f48e",
+        "nodes": "ea00ebd1be8947762ae0a45663b5f7e3d113eca66b010b2318f80dd8b1e0040c"
+      },
+      "targets": {
+        "complexportal": 1211,
+        "corum": 1315,
+        "edges": 527860,
+        "nodes": 17733
+      }
+    },
+    "STRING": {
+      "complexportal_complexes": 1197,
+      "corum_complexes": 1381,
+      "edges": 236712,
+      "gold_snapshot": "paper_v3",
+      "min_gold_size": 3,
+      "nodes": 15882,
+      "paths": {
+        "complexportal_gmt": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/gold/complexportal.gmt",
+        "corum_gmt": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/gold/corum.gmt",
+        "edges": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/data/processed/network/ppi_network_weighted.edgelist",
+        "nodes": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/data/processed/network/ppi_network_nodes.txt"
+      },
+      "sha256": {
+        "complexportal_gmt": "25e33ec4bd008d2313dd03daca67e5e63a7b0806a62fc28be5dc5e69534fd395",
+        "corum_gmt": "5cca83a69278151f219041b299cc7c994b8222cfdfda2de18b64a14ddf625798",
+        "edges": "29dd18b7c2386e9d041321e6ee29f5fd2d3f2378adf0d6274caa7bb614105ce2",
+        "nodes": "02d52e37bd26a5306c09ea643d8a8412ee0fe261762fc03a705347008bfad46f"
+      },
+      "targets": {
+        "complexportal": 1198,
+        "corum": 1317,
+        "edges": 236712,
+        "nodes": 15882
+      }
+    },
+    "hu.MAP2": {
+      "complexportal_complexes": 731,
+      "corum_complexes": 919,
+      "edges": 19631,
+      "gold_snapshot": "paper_v3",
+      "min_gold_size": 3,
+      "nodes": 7824,
+      "paths": {
+        "complexportal_gmt": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/gold/complexportal.gmt",
+        "corum_gmt": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/gold/corum.gmt",
+        "edges": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/processed/humap2/humap2_weighted.edgelist",
+        "nodes": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/processed/humap2/humap2_nodes.txt"
+      },
+      "sha256": {
+        "complexportal_gmt": "25e33ec4bd008d2313dd03daca67e5e63a7b0806a62fc28be5dc5e69534fd395",
+        "corum_gmt": "5cca83a69278151f219041b299cc7c994b8222cfdfda2de18b64a14ddf625798",
+        "edges": "c70f63e22714dea751183cd3e34a30f9275da4f2fc15e23848f0e63daa272981",
+        "nodes": "a3362d9733c42cadbb3d8bd9f36f81d33c1c03e6663d4263638d5b8c227017cf"
+      },
+      "targets": {
+        "complexportal": 730,
+        "corum": 848,
+        "edges": 19631,
+        "nodes": 7824
+      }
+    }
+  }
+}

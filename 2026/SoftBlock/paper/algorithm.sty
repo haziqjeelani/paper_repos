@@ -1,0 +1,14 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{algorithm}[2026/01/20 Minimal algorithm float package (stub)]
+
+% The OUP authoring template loads the `algorithm` package by default.
+% This repository does not use algorithm floats; this stub exists only to
+% provide the standard `algorithm` floating environment in minimal TeX installs.
+
+\RequirePackage{float}
+
+\newfloat{algorithm}{tbp}{loa}
+\floatname{algorithm}{Algorithm}
+\newcommand{\listofalgorithms}{\listof{algorithm}{List of Algorithms}}
+
+\endinput

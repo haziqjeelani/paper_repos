@@ -1,0 +1,58 @@
+{
+  "codeseg_diag": {
+    "Ks": [
+      8
+    ],
+    "blocks": {
+      "8": {
+        "n_blocks": 8,
+        "overlap_nodes": 15882
+      }
+    },
+    "runtime_ms": {
+      "8": 4568,
+      "total": 4568
+    }
+  },
+  "counts": {
+    "n_candidates_post_dedup": 14864,
+    "n_candidates_pre_dedup": 16556,
+    "n_codeseg_clusters": 6249,
+    "n_op": 2000,
+    "n_pool": 8000
+  },
+  "frozen": {
+    "Ks": [
+      8
+    ],
+    "global_dedup_jaccard": 0.85,
+    "mcl_backend": "gpu",
+    "mcl_inflation": 4.0,
+    "membership_power": 1.5,
+    "op_cap": 2000,
+    "op_max_jaccard": 0.5,
+    "pmin": 0.0,
+    "pool_cap": 8000,
+    "rerank_mode": "graph_only",
+    "rerank_model": null,
+    "rerank_score": "weighted_density",
+    "topk": 4
+  },
+  "graph": "STRING",
+  "graph_weights": {
+    "w_max": 0.9990000128746033,
+    "w_min": 0.699999988079071,
+    "weighted": true,
+    "weights_in_01": true
+  },
+  "hybrid": {
+    "linkcomm_min_size": 3,
+    "linkcomm_reason": "confidence-like weights in [0,1]",
+    "linkcomm_used": true,
+    "mode": "auto",
+    "n_linkcomm_clusters": 10307
+  },
+  "runtime_ms": 31465,
+  "seed": 42,
+  "tag": "v3modmw1k8_string_seed42"
+}

@@ -1,0 +1,70 @@
+{
+  "codeseg_diag": {
+    "Ks": [
+      6,
+      8,
+      16
+    ],
+    "blocks": {
+      "16": {
+        "n_blocks": 16,
+        "overlap_nodes": 11001
+      },
+      "6": {
+        "n_blocks": 6,
+        "overlap_nodes": 11001
+      },
+      "8": {
+        "n_blocks": 8,
+        "overlap_nodes": 11001
+      }
+    },
+    "runtime_ms": {
+      "16": 6546,
+      "6": 5281,
+      "8": 5773,
+      "total": 17600
+    }
+  },
+  "counts": {
+    "n_candidates_post_dedup": 11382,
+    "n_candidates_pre_dedup": 14988,
+    "n_codeseg_clusters": 10782,
+    "n_op": 2000,
+    "n_pool": 8000
+  },
+  "frozen": {
+    "Ks": [
+      6,
+      8,
+      16
+    ],
+    "global_dedup_jaccard": 0.85,
+    "mcl_backend": "gpu",
+    "mcl_inflation": 4.0,
+    "membership_power": 1.5,
+    "op_cap": 2000,
+    "op_max_jaccard": 0.5,
+    "pmin": 0.0,
+    "pool_cap": 8000,
+    "rerank_score": "weighted_density",
+    "topk": 4
+  },
+  "graph": "BioPlex",
+  "graph_weights": {
+    "w_max": 1.0,
+    "w_min": 1.0,
+    "weighted": false,
+    "weights_in_01": false
+  },
+  "hybrid": {
+    "linkcomm_min_size": 4,
+    "linkcomm_reason": "unweighted",
+    "linkcomm_used": true,
+    "mode": "auto",
+    "n_linkcomm_clusters": 4206
+  },
+  "runtime_ms": 29045,
+  "seed": 42,
+  "tag": "v3hyb02_bioplex_seed42"
+}

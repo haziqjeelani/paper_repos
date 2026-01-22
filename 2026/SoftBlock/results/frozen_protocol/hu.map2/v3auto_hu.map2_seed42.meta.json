@@ -1,0 +1,73 @@
+{
+  "codeseg_diag": {
+    "Ks": [
+      6,
+      8,
+      16
+    ],
+    "blocks": {
+      "16": {
+        "n_blocks": 16,
+        "overlap_nodes": 6617
+      },
+      "6": {
+        "n_blocks": 6,
+        "overlap_nodes": 6617
+      },
+      "8": {
+        "n_blocks": 8,
+        "overlap_nodes": 6617
+      }
+    },
+    "runtime_ms": {
+      "16": 4841,
+      "6": 3687,
+      "8": 3812,
+      "total": 12340
+    }
+  },
+  "counts": {
+    "n_candidates_post_dedup": 2788,
+    "n_candidates_pre_dedup": 6499,
+    "n_codeseg_clusters": 5007,
+    "n_op": 1885,
+    "n_pool": 2788
+  },
+  "frozen": {
+    "Ks": [
+      6,
+      8,
+      16
+    ],
+    "global_dedup_jaccard": 0.85,
+    "mcl_backend": "gpu",
+    "mcl_inflation": 4.0,
+    "membership_power": 1.5,
+    "op_cap": 2000,
+    "op_max_jaccard": 0.5,
+    "pmin": 0.0,
+    "pool_cap": 8000,
+    "rerank_mode": "graph_only",
+    "rerank_model": null,
+    "rerank_score": "auto",
+    "rerank_score_effective": "weighted_density",
+    "topk": 4
+  },
+  "graph": "hu.MAP2",
+  "graph_weights": {
+    "w_max": 1.0,
+    "w_min": 0.10001499950885773,
+    "weighted": true,
+    "weights_in_01": true
+  },
+  "hybrid": {
+    "linkcomm_min_size": 3,
+    "linkcomm_reason": "confidence-like weights in [0,1]",
+    "linkcomm_used": true,
+    "mode": "auto",
+    "n_linkcomm_clusters": 1492
+  },
+  "runtime_ms": 15863,
+  "seed": 42,
+  "tag": "v3auto_hu.map2_seed42"
+}

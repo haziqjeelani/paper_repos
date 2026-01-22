@@ -1,0 +1,23 @@
+{
+  "K": 16,
+  "cluster_temp": 30.0,
+  "dgi_weight": 1.0,
+  "epochs": 300,
+  "graph": "STRING",
+  "hidden_dim": 512,
+  "lr": 0.001,
+  "modularity_weight": 0.1,
+  "n_edges_undirected": 236712,
+  "n_nodes": 15882,
+  "num_cluster_iter": 1,
+  "objective": "hybrid",
+  "patience": 50,
+  "prototype_algo": "louvain",
+  "prototype_resolution": 1.0,
+  "prototype_threshold": 1e-07,
+  "seed": 42,
+  "svd_components": 64,
+  "topk_prototypes": 16,
+  "weight_decay": 0.005,
+  "weighted": true
+}

@@ -1,0 +1,8 @@
+numpy
+pandas
+networkx
+scipy
+matplotlib
+markov_clustering
+python-igraph
+leidenalg

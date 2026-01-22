@@ -1,0 +1,14 @@
+{
+  "complexportal_tsv": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/data/pathways/complex_portal/homo_sapiens.tsv",
+  "corum_archive_path": "codeseg/paper_v3/data/gold_test_2.1/raw/corum_release_2.1.zip",
+  "corum_kind": "all",
+  "corum_source_url": "https://mips.helmholtz-muenchen.de/fastapi-corum/public/file/download_archived_file?version=2.1",
+  "corum_version": "2.1",
+  "goa_id": "220",
+  "goa_path": "codeseg/paper_v3/data/gold_test_2.1/raw/goa_human.gaf.220.gz",
+  "goa_source_url": "https://ftp.ebi.ac.uk/pub/databases/GO/goa/old/HUMAN/goa_human.gaf.220.gz",
+  "outputs": {
+    "complexportal_gmt": "codeseg/paper_v3/data/gold_test_2.1/complexportal.gmt",
+    "corum_gmt": "codeseg/paper_v3/data/gold_test_2.1/corum.gmt"
+  }
+}

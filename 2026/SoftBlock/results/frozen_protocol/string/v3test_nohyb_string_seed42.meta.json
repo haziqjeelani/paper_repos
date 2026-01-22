@@ -1,0 +1,68 @@
+{
+  "codeseg_diag": {
+    "Ks": [
+      6,
+      8,
+      16
+    ],
+    "blocks": {
+      "16": {
+        "n_blocks": 16,
+        "overlap_nodes": 15882
+      },
+      "6": {
+        "n_blocks": 6,
+        "overlap_nodes": 15882
+      },
+      "8": {
+        "n_blocks": 8,
+        "overlap_nodes": 15882
+      }
+    },
+    "runtime_ms": {
+      "16": 5809,
+      "6": 5076,
+      "8": 5216,
+      "total": 16101
+    }
+  },
+  "counts": {
+    "n_candidates_post_dedup": 9824,
+    "n_candidates_pre_dedup": 18644,
+    "n_codeseg_clusters": 18644,
+    "n_op": 2000,
+    "n_pool": 8000
+  },
+  "frozen": {
+    "Ks": [
+      6,
+      8,
+      16
+    ],
+    "global_dedup_jaccard": 0.85,
+    "mcl_inflation": 4.0,
+    "membership_power": 1.5,
+    "op_cap": 2000,
+    "op_max_jaccard": 0.5,
+    "pmin": 0.0,
+    "pool_cap": 8000,
+    "topk": 4
+  },
+  "graph": "STRING",
+  "graph_weights": {
+    "w_max": 0.9990000128746033,
+    "w_min": 0.699999988079071,
+    "weighted": true,
+    "weights_in_01": true
+  },
+  "hybrid": {
+    "linkcomm_min_size": 0,
+    "linkcomm_reason": "forced off",
+    "linkcomm_used": false,
+    "mode": "off",
+    "n_linkcomm_clusters": 0
+  },
+  "runtime_ms": 23768,
+  "seed": 42,
+  "tag": "v3test_nohyb_string_seed42"
+}

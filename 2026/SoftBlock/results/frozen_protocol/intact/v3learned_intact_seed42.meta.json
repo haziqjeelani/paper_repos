@@ -1,0 +1,73 @@
+{
+  "codeseg_diag": {
+    "Ks": [
+      6,
+      8,
+      16
+    ],
+    "blocks": {
+      "16": {
+        "n_blocks": 16,
+        "overlap_nodes": 14632
+      },
+      "6": {
+        "n_blocks": 6,
+        "overlap_nodes": 14632
+      },
+      "8": {
+        "n_blocks": 8,
+        "overlap_nodes": 14632
+      }
+    },
+    "runtime_ms": {
+      "16": 8489,
+      "6": 8169,
+      "8": 7987,
+      "total": 24645
+    }
+  },
+  "counts": {
+    "n_candidates_post_dedup": 44779,
+    "n_candidates_pre_dedup": 47285,
+    "n_codeseg_clusters": 8379,
+    "n_op": 2000,
+    "n_pool": 8000
+  },
+  "frozen": {
+    "Ks": [
+      6,
+      8,
+      16
+    ],
+    "global_dedup_jaccard": 0.85,
+    "mcl_backend": "gpu",
+    "mcl_inflation": 4.0,
+    "membership_power": 1.5,
+    "op_cap": 2000,
+    "op_max_jaccard": 0.5,
+    "pmin": 0.0,
+    "pool_cap": 8000,
+    "rerank_mode": "learned",
+    "rerank_model": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/results/cache/reranker_string_seed42.json",
+    "rerank_score": "weighted_density",
+    "rerank_score_effective": null,
+    "topk": 4
+  },
+  "graph": "IntAct",
+  "graph_weights": {
+    "w_max": 1.0,
+    "w_min": 1.0,
+    "weighted": true,
+    "weights_in_01": true
+  },
+  "hybrid": {
+    "linkcomm_min_size": 3,
+    "linkcomm_reason": "confidence-like weights in [0,1]",
+    "linkcomm_used": true,
+    "mode": "auto",
+    "n_linkcomm_clusters": 38906
+  },
+  "runtime_ms": 154123,
+  "seed": 42,
+  "tag": "v3learned_intact_seed42"
+}

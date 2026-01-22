@@ -1,0 +1,82 @@
+{
+  "codeseg_diag": {
+    "Ks": [
+      6,
+      8,
+      16
+    ],
+    "blocks": {
+      "16": {
+        "n_blocks": 16,
+        "overlap_nodes": 11001
+      },
+      "6": {
+        "n_blocks": 6,
+        "overlap_nodes": 11001
+      },
+      "8": {
+        "n_blocks": 8,
+        "overlap_nodes": 11001
+      }
+    },
+    "runtime_ms": {
+      "16": 6745,
+      "6": 5026,
+      "8": 5603,
+      "total": 17374
+    }
+  },
+  "counts": {
+    "n_candidates_post_dedup": 11394,
+    "n_candidates_pre_dedup": 14987,
+    "n_codeseg_clusters": 10781,
+    "n_op": 2000,
+    "n_pool": 8000
+  },
+  "frozen": {
+    "Ks": [
+      6,
+      8,
+      16
+    ],
+    "global_dedup_jaccard": 0.85,
+    "global_dedup_mode": "union",
+    "mcl_backend": "gpu",
+    "mcl_inflation": 4.0,
+    "membership_power": 1.5,
+    "op_cap": 2000,
+    "op_max_jaccard": 0.5,
+    "op_selection": "nms",
+    "oracle_target": null,
+    "pmin": 0.0,
+    "pool_cap": 8000,
+    "rerank_mode": "graph_only",
+    "rerank_model": null,
+    "rerank_score": "weighted_density",
+    "rerank_score_effective": "weighted_density",
+    "topk": 4
+  },
+  "gold": {
+    "complexportal_gmt": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/gold/complexportal.gmt",
+    "complexportal_source": null,
+    "corum_gmt": "/mnt/c/Users/haziq/OneDrive - Claremont Graduate University/Projects/Research/codeseg/paper_v3/data/gold/corum.gmt",
+    "snapshot": "paper_v3"
+  },
+  "graph": "BioPlex",
+  "graph_weights": {
+    "w_max": 1.0,
+    "w_min": 1.0,
+    "weighted": false,
+    "weights_in_01": false
+  },
+  "hybrid": {
+    "linkcomm_min_size": 4,
+    "linkcomm_reason": "unweighted",
+    "linkcomm_used": true,
+    "mode": "auto",
+    "n_linkcomm_clusters": 4206
+  },
+  "runtime_ms": 29129,
+  "seed": 42,
+  "tag": "v3_paperbench_bioplex_seed42"
+}

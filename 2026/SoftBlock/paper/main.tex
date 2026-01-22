@@ -1,0 +1,370 @@
+% ISMB 2026 Proceedings submission (Bioinformatics) using the official OUP authoring template.
+\documentclass[unnumsec,webpdf,contemporary,large,namedate]{oup-authoring-template}%
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{accsupp}
+
+\graphicspath{{figures/}}
+
+\newcommand{\includegraphicsalt}[3][]{%
+  \BeginAccSupp{method=pdfstringdef,unicode,Alt={#2}}%
+  \includegraphics[#1]{#3}%
+  \EndAccSupp{}%
+}
+
+\begin{document}
+
+\journaltitle{Bioinformatics}
+\copyrightyear{2026}
+\pubyear{2026}
+\appnotes{Proceedings paper}
+\firstpage{1}
+
+\title[SoftBlock]{SoftBlock: Transferable Soft Blocks for Overlapping Protein Complex Recovery under a Frozen Protocol}
+
+\author[1,$\ast$]{Haziq Jeelani}
+\author[2]{Fayeq Jeelani Syed}
+
+\authormark{Jeelani and Syed}
+
+\address[1]{\orgname{Claremont Graduate University}, \country{United States}}
+\address[2]{\orgname{Indiana University}, \country{United States}; \href{mailto:faysyed@iu.edu}{faysyed@iu.edu}}
+
+\corresp[$\ast$]{Corresponding author. \href{mailto:haziq.jeelani@cgu.edu}{haziq.jeelani@cgu.edu}}
+
+\abstract{%
+\textbf{Motivation:} Protein complexes overlap, and protein--protein interaction networks vary substantially across experimental sources. This often pushes complex-recovery pipelines toward graph-specific tuning, making transfer and cross-dataset comparison brittle.\\
+\textbf{Results:} We present SoftBlock, a coarse-to-fine pipeline that learns soft memberships once on a reference interaction network (STRING) and transfers them as overlapping blocks to other networks. Within each block we run Markov clustering, then consolidate candidates with graph-only scoring and diversity-aware top-$N$ selection. Under a strict frozen protocol (tune on STRING, freeze elsewhere), we evaluate on seven human interaction networks against CORUM and Complex Portal gold standards. SoftBlock performs consistently across graphs, outperforming strong overlap baselines and remaining competitive with PCGAN under matched conditions.\\
+\textbf{Availability and Implementation:} Code is available at \url{https://github.com/haziqjeelani/paper_repos/tree/main/2026/SoftBlock}.\\
+\textbf{Contact:} \href{mailto:haziq.jeelani@cgu.edu}{haziq.jeelani@cgu.edu}\\
+\textbf{Supplementary Information:} Supplementary data are available online.%
+}
+
+\keywords{protein complexes, PPI networks, overlapping communities, transferability, frozen protocol}
+
+\maketitle
+
+\section{Introduction}
+
+Protein complexes are fundamental functional units, and protein--protein interaction (PPI) networks are a common substrate for recovering them. The challenge is not only overlap---proteins participate in multiple complexes---but also dataset shift: PPIs are noisy and incomplete, and assay-specific biases (e.g., affinity purification--mass spectrometry (AP--MS), yeast two-hybrid (Y2H), or curated compilations) change graph structure. Methods tuned to one benchmark can therefore drift when moved to a new PPI.
+
+Evaluation is also sensitive to operating point. Best-match scores can improve simply by emitting more clusters, so comparisons can become hard to interpret. Fixed-cap operating points (top-$N$ predictions) and frozen protocols---tune once and avoid per-graph retuning---help keep comparisons defensible.
+
+SoftBlock is built around a simple hypothesis: learn a coarse, transferable prior once on a rich reference PPI, then reuse it to constrain overlap-aware complex recovery on other graphs. Concretely, we compute SoftBlock soft memberships on STRING, transfer them as overlapping blocks on each target PPI, run MCL within blocks to enumerate candidates, and then deduplicate, rerank, and select a fixed-size, non-redundant set of predictions.
+
+\paragraph{Contributions.}
+\begin{itemize}
+    \item A transferable soft-membership prior: SoftBlock memberships computed once on a reference PPI are reused as overlapping blocks across target PPIs.
+    \item A practical overlap-aware coarse-to-fine pipeline: block-local solving (MCL~\citep{enright2002mcl,vandongen2000mcl}), global deduplication, graph-only reranking, and a diversity-aware top-$N$ selector for an explicit operating point.
+    \item A strict frozen-protocol evaluation: tune on STRING and freeze elsewhere across seven PPIs and two gold standards, using fixed-cap operating points and OS metrics~\citep{brohee2006evaluation}, plus a matched-protocol comparison to PCGAN~\citep{pan2023pcgan}.
+\end{itemize}
+
+\section{Related Work}
+
+\paragraph{Overlap complex detection.} Early complex discovery methods typically look for dense subgraphs or locally cohesive regions, including MCODE~\citep{bader2003mcode} and ClusterONE~\citep{nepusz2012clusterone}. Overlap-aware community methods represent overlap more explicitly (e.g., OSLOM2 \citep{lancichinetti2011oslom}, SLPA \citep{xie2011slpa}, link communities \citep{ahn2010link}, BigCLAM \citep{yang2012bigclam}). Their performance can be sensitive to operating point and graph-specific hyperparameters.
+
+\paragraph{Learning-based complex prediction.} More recent approaches bring supervision or generative modeling into the pipeline (e.g., Super.Complex~\citep{palukuri2021supercomplex}, reinforcement learning~\citep{palukuri2023rl}, and PCGAN~\citep{pan2023pcgan}). These methods can be strong on specific graphs and protocols, but comparisons across papers are hard without matching the graph construction, the gold set snapshot, and the evaluation operating point.
+
+\paragraph{Evaluation and operating-point control.} Complex prediction is commonly evaluated with best-match scores and overprediction-aware metrics such as Sn/PPV/Accuracy and MMR~\citep{brohee2006evaluation}. Because the number of predicted clusters drives the precision/recall trade-off, fixed-cap operating points (top-$N$ clusters) are a practical way to keep comparisons interpretable.
+
+\section{Methods}
+
+\paragraph{Overview.} SoftBlock turns a reference PPI with rich evidence (STRING) and a target PPI $G = (V, E)$ into a set of overlapping complex predictions in three stages: (i)~compute a transferable soft-membership prior on the reference graph, (ii)~use that prior to define overlapping blocks on the target graph and run a local solver inside each block to generate candidates, and (iii)~consolidate and select a fixed operating point using graph-only scores and overlap suppression. Figure~\ref{fig:pipeline} summarizes the pipeline.
+
+\begin{figure*}[t]
+\centering
+\includegraphicsalt[width=\textwidth]{Pipeline diagram showing SoftBlock: reference PPI soft memberships are transferred to target PPIs as overlapping blocks; a local solver runs per block; candidates are merged, reranked, and selected under a fixed cap.}{fig_v3_pipeline.png}
+\caption{SoftBlock pipeline: transferable soft blocks from a reference PPI (STRING) enable overlap-aware coarse-to-fine complex recovery on diverse target PPIs under a frozen protocol.}
+\label{fig:pipeline}
+\end{figure*}
+
+\subsection{SoftBlock Soft Memberships as Transferable Block Priors}
+
+On the reference PPI $G_{\text{ref}} = (V_{\text{ref}}, E_{\text{ref}})$, SoftBlock produces a row-stochastic soft membership matrix $R \in [0,1]^{|V_{\text{ref}}| \times K}$. We compute Louvain communities~\citep{blondel2008louvain} on $G_{\text{ref}}$ (resolution $=1.0$) and take the $K$ largest as prototype node sets $\{C_k\}_{k=1}^K$. A 1-layer GCN encoder~\citep{kipf2017gcn} trained with Deep Graph Infomax~\citep{velickovic2019dgi} (TSVD-64 node features; 512-d embeddings; full-batch Adam, lr $=10^{-3}$, weight decay $=5\times 10^{-3}$, 300 epochs with patience 50; corruption permutes node-feature rows with adjacency fixed) outputs $\ell_2$-normalized embeddings $z_v$; prototype vectors are centroids $\mu_k = |C_k|^{-1}\sum_{v\in C_k} z_v$, and memberships use a temperature-softmax over dot products: $R_{vk} = \operatorname{softmax}_k(\tau\, z_v^\top \mu_k)$. We use $\tau=30$ and one soft $k$-means refinement step (initialized by the Louvain prototypes), both selected on STRING and then frozen.
+
+To transfer this prior to a target graph $G = (V, E)$, we restrict $R$ to the node overlap $V \cap V_{\text{ref}}$ and interpret each column $k$ as a coarse block membership function. We optionally apply a frozen calibration by sharpening/flattening each row: for a power $a > 0$, we compute $\tilde{R}_{vk} \propto R_{vk}^a$ and renormalize so $\sum_k \tilde{R}_{vk} = 1$.
+
+\subsection{Overlapping Coarse Blocks}
+
+We convert soft memberships into overlapping blocks by assigning each node $v$ to multiple modules. In the default top-$k$ rule, we assign $v$ to the indices of its largest $k$ membership values (optionally thresholded by $\tilde{R}_{vk} \geq p_{\min}$), yielding blocks $\{B_1, \ldots, B_K\}$ with substantial overlap. Overlap at the block level enables downstream recovery of overlapping complexes.
+
+\subsection{Coarse-to-Fine Local Solving Inside Blocks}
+
+For each block $B_k$, we extract the induced subgraph $G[B_k]$ and run a local complex finder. Our default solver is MCL~\citep{enright2002mcl,vandongen2000mcl}, which is widely used for PPI clustering and works well as a dense-subgraph enumerator inside blocks. To isolate the contribution of the transfer prior (rather than MCL alone), we also run wrapper variants that swap the local solver inside each block (e.g., SLPA~\citep{xie2011slpa} or a ClusterONE-like greedy growth~\citep{nepusz2012clusterone}) while keeping the rest of the protocol fixed. We then union candidates across blocks and deduplicate near-duplicates with a Jaccard-based merge.
+
+\subsection{Multiscale \& Multi-K Union}
+
+To increase robustness without per-graph tuning, we union candidate clusters across multiple prototype counts $K \in \{6, 8, 16\}$ by training $R$ on STRING separately for each $K$ and merging the resulting candidate pools (optionally also across a small set of membership calibrations). All such choices are selected once on STRING and frozen for all transfer PPIs.
+
+\subsection{Graph-Only Reranking and Diversity-Aware Top-N Selection}
+
+From the candidate pool, we select a defensible operating point. We score each candidate cluster using only the target graph, e.g., (weighted) density and cohesiveness. For a cluster $C$ with $n = |C|$ and internal weight sum $W_{\text{in}}(C)$, weighted density is $W_{\text{in}}(C)/\binom{n}{2}$; a boundary-aware cohesiveness score is $2W_{\text{in}}(C)/(2W_{\text{in}}(C) + W_{\text{cut}}(C))$, where $W_{\text{cut}}(C)$ sums weights of edges leaving $C$. We optionally train a lightweight linear reranker on STRING using only graph-derived cluster features and gold supervision; however, unless explicitly stated, we use a graph-only scorer to keep the evaluation focused on transfer and operating-point control.
+
+To avoid spending the top-$N$ budget on redundant micro-clusters, we apply a simple diversity filter after sorting by score: we greedily keep a candidate only if its Jaccard overlap with all previously selected clusters is below a threshold (default 0.5). This overlap-suppression heuristic is intentionally simple, but it makes fixed-cap comparisons substantially more stable.
+
+\subsection{Hybrid Candidate Augmentation (Link Communities)}
+
+Because link communities~\citep{ahn2010link} can be strong on STRING (and can also contribute candidates outside $V \cap V_{\text{ref}}$), we evaluate a hybrid recipe that unions SoftBlock candidates with link-communities candidates and reranks the combined pool. To avoid per-dataset branching, the frozen \texttt{hybrid\_auto} gate is deterministic: we include link-communities candidates iff the target graph is unweighted (keeping clusters with $|C|\ge4$) or weighted with confidence-like weights in $[0,1]$ (keeping clusters with $|C|\ge3$); otherwise we disable link communities and use blocks-only candidates.
+
+\section{Experimental Setup}
+
+\subsection{Graphs and Gold Standards}
+
+We evaluate on seven human PPIs: STRING~\citep{szklarczyk2019string}, BioPlex~\citep{huttlin2015bioplex}, HuRI~\citep{luck2020huri}, BioGRID~\citep{oughtred2021biogrid}, IntAct~\citep{deltoro2022intact}, ComPPI~\citep{veres2015comppi}, and hu.MAP2~\citep{drew2021humap2}. Gold standards are CORUM~\citep{giurgiu2019corum} and Complex Portal (CP)~\citep{meldal2015complex}, intersected to each graph's node universe with a minimum complex size of 3. Table~\ref{tab:graphs} summarizes graph statistics.
+
+\begin{table}[t]
+\centering
+\caption{Human PPI graphs and gold standards. Gold complexes are intersected to each graph node set (minimum complex size = 3).}
+\label{tab:graphs}
+\begin{tabular}{lrrrr}
+\toprule
+Graph & Nodes & Edges & CORUM & CP \\
+\midrule
+STRING & 15\,882 & 236\,712 & 1317 & 1198 \\
+BioPlex & 13\,923 & 118\,144 & 1164 & 961 \\
+HuRI & 8\,109 & 51\,686 & 537 & 616 \\
+BioGRID & 27\,590 & 1\,002\,631 & 1355 & 1157 \\
+ComPPI & 15\,277 & 170\,728 & 1310 & 1158 \\
+IntAct & 17\,733 & 527\,860 & 1315 & 1211 \\
+hu.MAP2 & 7\,824 & 19\,631 & 848 & 730 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Metrics}
+
+We report (i)~mean best-match F1 against CORUM and Complex Portal, and (ii)~overprediction-aware OS metrics (Sn/PPV/Accuracy and greedy maximum matching ratio (MMR))~\citep{brohee2006evaluation}. When we report a single number ``averaged over CORUM and CP,'' we compute the metric separately for each gold standard on the same predictions and then take the arithmetic mean (we do not merge the gold sets).
+
+\paragraph{Best-match F1.} For a gold complex $G$ and a predicted cluster $C$, let precision be $|G \cap C|/|C|$ and recall be $|G \cap C|/|G|$. Best-match F1 assigns each gold complex the maximum F1 over all predicted clusters with at least a small overlap (we use $|G \cap C| \geq 2$), and reports the mean over gold complexes.
+
+\paragraph{OS metrics.} We use the overlap score $\text{OS}(G, C) = |G \cap C|^2/(|G||C|)$. Sensitivity Sn is the mean over gold complexes of the best overlap score ($\max_C \text{OS}(G, C)$), and positive predictive value PPV is the mean over predicted clusters of the best overlap score ($\max_G \text{OS}(G, C)$). Accuracy is $\sqrt{\text{Sn} \cdot \text{PPV}}$. Greedy maximum matching ratio (MMR) approximates the maximum-weight matching ratio on the bipartite graph between gold complexes and predicted clusters.
+
+\subsection{Frozen Protocol}
+
+All hyperparameters (block assignment, solver parameters, reranking score, and the cap $N$) are tuned on STRING only. The resulting configuration is then applied without modification to all other PPIs. Unless otherwise stated, SoftBlock uses top-$k$ block assignment ($k = 4$, $p_{\min} = 0$), membership calibration $a = 1.5$, multi-K union (separate reference memberships for $K \in \{6, 8, 16\}$), and MCL inflation 4.0, followed by global deduplication (Jaccard 0.85; union-merge near-duplicates) and graph-only weighted-density reranking. For the large-pool table we keep up to 8000 clusters; for fixed-cap comparisons we use $N = 2000$ with overlap suppression (greedy NMS, max Jaccard $< 0.5$). We rerun across three random seeds (42/43/44) and report mean $\pm$ std and significance checks in the Supplementary Material.
+
+\subsection{Baselines}
+
+We compare to strong baselines under the same frozen protocol, including MCODE and ClusterONE \citep{bader2003mcode,nepusz2012clusterone} and overlap-aware methods (OSLOM2, SLPA, link communities, BigCLAM) \citep{lancichinetti2011oslom,xie2011slpa,ahn2010link,yang2012bigclam}. For each baseline, we select its hyperparameters on STRING only and reuse the same setting unchanged across all transfer PPIs. We also evaluate learning-based predictors on hu.MAP2 (Super.Complex and an RL predictor) \citep{palukuri2021supercomplex,palukuri2023rl} under the same evaluator.
+
+\section{Results}
+
+\subsection{Main Cross-PPI Results Under a Frozen Protocol}
+
+\paragraph{Uncapped candidate pools.} Best-match scores can improve simply by emitting more candidate complexes. We therefore report the uncapped prediction count (\#PC) in Table~\ref{tab:uncapped}; this should be interpreted together with the fixed-cap comparisons (Table~\ref{tab:capped}).
+
+\begin{table*}[t]
+\centering
+\caption{Frozen protocol performance (uncapped candidate pools). We report \#PC and mean best-match F1 on CORUM (C) and Complex Portal (CP). Best Baseline is selected by mean best-match F1 averaged over C/CP; it is link communities on all graphs except HuRI (ClusterONE).}
+\label{tab:uncapped}
+\begin{tabular}{l|rrr|rrr}
+\toprule
+ & \multicolumn{3}{c|}{SoftBlock} & \multicolumn{3}{c}{Best Baseline} \\
+Graph & \#PC & F1$_\text{C}$ & F1$_\text{CP}$ & \#PC & F1$_\text{C}$ & F1$_\text{CP}$ \\
+\midrule
+BioGRID & 4560 & .301 & .371 & 7940 & .182 & .174 \\
+BioPlex & 8000 & .386 & .475 & 7838 & .340 & .425 \\
+ComPPI & 8000 & .392 & .418 & 7984 & .355 & .367 \\
+HuRI & 4733 & .236 & .295 & 1530 & .096 & .141 \\
+IntAct & 8000 & .221 & .270 & 7974 & .186 & .240 \\
+hu.MAP2 & 2641 & .473 & .592 & 1227 & .389 & .485 \\
+STRING & 8000 & .513 & .553 & 7983 & .493 & .508 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\caption{Frozen operating point (target cap $N = 2000$, diversity-aware selection). \#PC is the realized output count after overlap suppression; we report averaged OS Accuracy, MMR, and best-match F1 across CORUM and Complex Portal. Best Baseline (selected by mean best-match F1 averaged over CORUM/CP) is link communities on all graphs.}
+\label{tab:capped}
+\begin{tabular}{l|rrrr|rrrr}
+\toprule
+ & \multicolumn{4}{c|}{SoftBlock} & \multicolumn{4}{c}{Best Baseline} \\
+Graph & \#PC & Acc & MMR & F1 & \#PC & Acc & MMR & F1 \\
+\midrule
+BioGRID & 2000 & .150 & .125 & .299 & 2000 & .135 & .078 & .151 \\
+BioPlex & 2000 & .161 & .121 & .322 & 2000 & .157 & .114 & .303 \\
+ComPPI & 2000 & .186 & .139 & .281 & 1976 & .168 & .123 & .253 \\
+HuRI & 2000 & .109 & .086 & .229 & 417 & .028 & .009 & .017 \\
+IntAct & 1905 & .136 & .089 & .176 & 1681 & .119 & .069 & .132 \\
+hu.MAP2 & 1385 & .210 & .146 & .492 & 836 & .196 & .101 & .426 \\
+STRING & 2000 & .207 & .163 & .444 & 2000 & .192 & .150 & .416 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\paragraph{Fixed-cap comparisons.} Table~\ref{tab:capped} uses a shared target cap ($N=2000$) with overlap suppression; \#PC reports the realized output size, so some baselines are cap- or NMS-limited and output fewer than $N$ predictions. HuRI is the most extreme case: the best baseline yields 417 clusters; at a rate-matched SoftBlock operating point ($N=417$) we obtain Acc $=.035$, MMR $=.018$, and F1 $=.043$ (mean over seeds 42/43/44). Figure~\ref{fig:comparison} summarizes the gap to the best baseline across graphs.
+
+\begin{figure}[t]
+\centering
+\includegraphicsalt[width=\columnwidth]{Bar chart comparing SoftBlock vs the best baseline across seven PPIs under a frozen protocol: best-match F1 (CORUM and Complex Portal) and capped operating-point metrics at N=2000.}{fig_v3_comparison.png}
+\caption{SoftBlock cross-PPI performance under the frozen protocol. (a) Best-match F1 against CORUM and Complex Portal gold standards. (b) Operating-point metrics at $N=2000$ with diversity-aware selection.}
+\label{fig:comparison}
+\end{figure}
+
+\subsection{Operating-Point Control with Diversity-Aware Selection}
+
+\paragraph{Why diversity-aware selection matters.} Fixed-cap selection by score alone can spend the budget on many near-duplicate micro-clusters, especially on sparse PPIs and under wrapper solvers. The overlap-suppression step (max Jaccard $< 0.5$) is a simple way to make the operating point less brittle without touching upstream candidate generation.
+
+\subsection{Operating-Point Sensitivity}
+
+\paragraph{Sweeping the cap and overlap threshold.} The frozen protocol fixes both the cap $N$ and the overlap-suppression threshold (max Jaccard) on STRING. To check that our cross-PPI comparisons are not an artifact of a particular operating point, we sweep $N$ (with max Jaccard fixed at 0.5) and sweep max Jaccard (with $N$ fixed at 2000) on two contrasting graphs: BioGRID (dense, weighted) and HuRI (sparse, unweighted). Figure~\ref{fig:op_sensitivity} shows the sweep curves; Table~\ref{tab:op_sensitivity} summarizes ranks across sweep settings. SoftBlock is stable on BioGRID (top-ranked across settings) and remains competitive on HuRI (within the top two by OS Accuracy; top-two by MMR).
+
+\begin{figure*}[t]
+\centering
+\includegraphicsalt[width=0.96\textwidth]{Four-panel line plots for BioGRID showing OS Accuracy and greedy MMR (mean over CORUM and Complex Portal) as a function of the operating-point cap N (500 to 3000) and as a function of the overlap-suppression threshold max Jaccard (0.3 to 1.0, where 1.0 disables suppression). Curves compare SoftBlock variants and baseline methods under the frozen protocol.}{fig_v3_op_sensitivity_biogrid.png}
+
+\includegraphicsalt[width=0.96\textwidth]{Four-panel line plots for HuRI showing OS Accuracy and greedy MMR (mean over CORUM and Complex Portal) as a function of the operating-point cap N (500 to 3000) and as a function of the overlap-suppression threshold max Jaccard (0.3 to 1.0, where 1.0 disables suppression). Curves compare SoftBlock variants and baseline methods under the frozen protocol.}{fig_v3_op_sensitivity_huri.png}
+\caption{Sensitivity of fixed-cap comparisons to the cap $N$ and overlap suppression (max Jaccard). We sweep $N$ at fixed max Jaccard $=0.5$ and sweep max Jaccard at fixed $N=2000$ on BioGRID (dense/weighted) and HuRI (sparse/unweighted). Metrics are OS Accuracy and greedy MMR, averaged over CORUM and Complex Portal.}
+\label{fig:op_sensitivity}
+\end{figure*}
+
+\begin{table*}[t]
+\centering
+\caption{Sensitivity of the frozen operating point to the cap $N$ and overlap-suppression threshold. We summarize the rank of SoftBlock among all evaluated methods under OS Accuracy and greedy MMR across the sweep settings (lower rank is better).}
+\label{tab:op_sensitivity}
+\begin{tabular}{llrrrrrr}
+\toprule
+Graph & Sweep & \#settings & Top1 Acc & Med rank & Worst & Top1 MMR & Worst \\
+\midrule
+BioGRID & cap sweep & 4 & 4 & 1.0 & 1 & 4 & 1 \\
+BioGRID & Jaccard sweep & 4 & 3 & 1.0 & 2 & 4 & 1 \\
+HuRI & cap sweep & 4 & 0 & 2.0 & 2 & 1 & 2 \\
+HuRI & Jaccard sweep & 4 & 0 & 2.0 & 2 & 1 & 2 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Transfer vs Node Overlap with STRING}
+
+SoftBlock transfers a block prior defined on $V \cap V_{\text{ref}}$, so it is natural to ask how performance changes as that overlap shrinks. Table~\ref{tab:node_overlap} reports the overlap fraction for each graph along with uncapped mean best-match F1 and mean greedy MMR (averaged over CORUM and Complex Portal). Figure~\ref{fig:node_overlap} visualizes the same relationship and compares SoftBlock to the strongest baseline on each graph.
+
+\begin{table}[t]
+\centering
+\caption{Node overlap with the reference graph (STRING) and uncapped frozen-protocol performance. Overlap is $|V \cap V_{\text{ref}}|/|V|$ where $V_{\text{ref}}$ are STRING nodes. Performance is shown for SoftBlock (\texttt{hybrid\_auto}) using mean best-match F1 and mean greedy MMR (averaged over CORUM and Complex Portal).}
+\label{tab:node_overlap}
+\begin{tabular}{lrrrr}
+\toprule
+Graph & Nodes & Overlap & Mean F1 & Mean MMR \\
+\midrule
+BioGRID & 27590 & 53.2\% & 0.336 & 0.172 \\
+BioPlex & 13923 & 79.0\% & 0.431 & 0.239 \\
+IntAct & 17733 & 82.7\% & 0.246 & 0.158 \\
+HuRI & 8109 & 83.6\% & 0.265 & 0.117 \\
+hu.MAP2 & 7824 & 84.6\% & 0.532 & 0.200 \\
+ComPPI & 15277 & 86.8\% & 0.405 & 0.251 \\
+STRING & 15882 & 100.0\% & 0.533 & 0.292 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure*}[t]
+\centering
+\includegraphicsalt[width=\textwidth]{Two scatter plots showing transfer performance versus node overlap with STRING. The x-axis is the fraction of nodes overlapping with STRING. The left panel plots mean best-match F1; the right panel plots mean greedy MMR. Blue circles show SoftBlock (hybrid_auto) and orange triangles show the best baseline per graph.}{fig_v3_node_overlap.png}
+\caption{Transfer performance vs.\ node overlap with STRING ($|V \cap V_{\text{ref}}|/|V|$). Blue circles show SoftBlock (\texttt{hybrid\_auto}) and orange triangles show the best baseline per graph (by mean best-match F1). Metrics are mean best-match F1 and mean greedy MMR, averaged over CORUM and Complex Portal.}
+\label{fig:node_overlap}
+\end{figure*}
+
+\subsection{Runtime and Scalability}
+
+\begin{table*}[t]
+\centering
+\caption{Runtime and memory footprint (peak RSS) for SoftBlock (\texttt{hybrid\_auto}) and the strongest baseline per graph. We report wall-clock time in minutes for the main pipeline stages and the total, along with peak resident memory (GiB). Timings exclude CORUM/ComplexPortal evaluation. Stage abbreviations: MCL = block-local Markov Clustering; LC = link communities (when used); Ens = multi-$K$ union; Hyb = hybrid union/rerank.}
+\label{tab:runtime}
+\begin{tabular}{lrrrrrrrrl}
+\toprule
+Graph & Nodes & Edges & MCL & LC & Ens & Hyb & Total & Peak GiB & Best baseline (min / GiB) \\
+\midrule
+BioGRID & 27590 & 1002631 & 2.25 & 0.00 & 0.13 & 0.08 & 2.45 & 2.76 & Link communities (0.63 / 0.86) \\
+IntAct & 17733 & 527860 & 1.42 & 0.24 & 0.09 & 0.24 & 1.99 & 1.91 & Link communities (0.24 / 0.78) \\
+STRING & 15882 & 236712 & 0.86 & 0.20 & 0.22 & 0.26 & 1.54 & 0.95 & Link communities (0.20 / 0.74) \\
+ComPPI & 15277 & 170728 & 1.03 & 0.17 & 0.17 & 0.36 & 1.73 & 2.10 & Link communities (0.17 / 0.73) \\
+BioPlex & 13923 & 118144 & 0.53 & 0.12 & 0.10 & 0.16 & 0.90 & 0.78 & Link communities (0.12 / 0.72) \\
+HuRI & 8109 & 51686 & 0.30 & 0.06 & 0.06 & 0.08 & 0.51 & 0.75 & ClusterONE (0.22 / 0.71) \\
+hu.MAP2 & 7824 & 19631 & 0.32 & 0.06 & 0.04 & 0.05 & 0.47 & 0.74 & Link communities (0.06 / 0.71) \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Additional Gold: hu.MAP2 Complexes}
+
+To complement curated gold standards (CORUM, Complex Portal), we also treat the hu.MAP2 complex catalog as an additional gold standard on the hu.MAP2 graph. We compare to a published RL predictor and to SLPA, and we report a wrapper variant that runs SLPA inside transferred SoftBlock blocks (Table~\ref{tab:humap2}).
+
+\begin{table}[t]
+\centering
+\caption{hu.MAP2 complexes as gold standard on hu.MAP2 graph. All capped methods use $N = 2000$ with diversity-aware selection.}
+\label{tab:humap2}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Method & \#PC & F1 & Acc & MMR \\
+\midrule
+Published RL predictor (capped) & 2000 & .483 & .377 & .201 \\
+SLPA baseline & 1387 & .553 & .528 & .227 \\
+SoftBlock + wrapper SLPA & 2000 & .567 & .502 & .277 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{PCGAN-Protocol Head-to-Head on CPIN-H}
+
+We compare to PCGAN~\citep{pan2023pcgan} under their published protocol on CPIN-H (Table~\ref{tab:pcgan}). At a matched \#PC, SoftBlock yields a slightly higher F-measure and MMR, trading lower recall for higher precision.
+
+\begin{table}[t]
+\centering
+\caption{PCGAN-protocol head-to-head on CPIN-H (human): Rate-match Recall/Precision/F-measure and MMR at matched \#PC = 1942.}
+\label{tab:pcgan}
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+Method & \#PC & Rec & Prec & F & MMR \\
+\midrule
+SoftBlock + graph-only & 1942 & .241 & .257 & .249 & .063 \\
+PCGAN (published) & 1942 & .288 & .213 & .245 & .058 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Split sensitivity.} Table~\ref{tab:pcgan} follows PCGAN's published split, which is induced by CORUM file order. To assess sensitivity, we reshuffle the CORUM list 100 times and recompute the split. Across shuffles, PCGAN varies substantially; the mean $\Delta$F-measure (SoftBlock $-$ PCGAN) is $0.060$ [0.049, 0.070] (95\% CI).
+
+\section{Discussion}
+
+\paragraph{What we can (and cannot) claim.} We avoid broad ``SOTA'' claims across mismatched datasets and protocols. The claim we are comfortable making is narrower: under the frozen protocol (tune on STRING, freeze elsewhere), SoftBlock is consistently competitive with (and often better than) the strong overlap baselines we evaluated, and it remains competitive with PCGAN when evaluated under matched conditions.
+
+\paragraph{Runtime and scalability.} SoftBlock runs a local solver (MCL) inside many overlapping blocks, so runtime is dominated by this block-local stage. Even on the largest graph (BioGRID, $\sim$1M edges), end-to-end hybrid\_auto inference remains tractable under the frozen configuration (Table~\ref{tab:runtime}). Additional diagnostics are in the Supplementary Material.
+
+\paragraph{Biological plausibility beyond benchmarks.} Gold standards are incomplete and can miss compositional variants of known assemblies. To complement CORUM/Complex Portal matching, we provide GO-slim enrichment case studies for high-scoring predictions on STRING that are unmatched under our overlap-score criterion (max OS $< 0.2$). Representative examples show coherent cellular-component enrichment (see Supplementary).
+
+\paragraph{Limitations.} First, a transferable prior anchored on STRING may underperform on target graphs with limited node overlap or markedly different interaction semantics. Our block prior is defined on $V \cap V_{\text{ref}}$, so recovering complexes involving proteins absent from STRING remains limited unless additional candidate sources (e.g., link communities) are enabled; Figure~\ref{fig:node_overlap} and Table~\ref{tab:node_overlap} summarize this dependence. Second, comparisons across papers remain challenging due to differences in graph construction, gold-set versions, and metric definitions; we therefore emphasize like-for-like head-to-heads.
+
+\section{Reproducibility}
+
+Code and tracked artifacts are available at: \url{https://github.com/haziqjeelani/paper_repos/tree/main/2026/SoftBlock}. The main frozen-protocol tables can be reproduced with the scripts under \texttt{paper\_v3/src/}; the default entry point is \texttt{make -C paper\_v3 operating-point SEED=42}. Additional analyses are provided in the Supplementary Material.
+
+\section{Conclusion}
+
+SoftBlock shows that a transferable soft-membership prior, paired with a simple local solver and explicit operating-point control, can deliver robust overlapping complex recovery across diverse human PPIs under a strict frozen protocol.
+
+\section{Data Availability}
+
+Code to reproduce the main tables and figures is available at \url{https://github.com/haziqjeelani/paper_repos/tree/main/2026/SoftBlock}. The PPI networks and gold standards used in this work are publicly available from the cited sources; the repository includes scripts to download/fetch and preprocess inputs, along with pinned CORUM/Complex Portal snapshots used for the paper benchmark under \texttt{paper\_v3/data/}.
+
+\section{Funding}
+
+This research received no specific grant from any funding agency in the public, commercial, or not-for-profit sectors.
+
+\section{Conflict of Interest}
+
+The authors declare no competing interests.
+
+\section{Acknowledgements}
+
+None.
+
+\bibliographystyle{abbrvnat}
+\bibliography{references}
+
+\end{document}
