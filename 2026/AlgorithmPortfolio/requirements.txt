@@ -1,0 +1,11 @@
+numpy
+pandas
+matplotlib
+seaborn
+networkx
+scipy
+pyyaml
+
+# Optional (Mesa-based ABM; not required for the baseline runner)
+# mesa[network]
+
